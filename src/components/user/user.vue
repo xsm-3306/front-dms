@@ -1,5 +1,10 @@
 <template>
-    当前用户:{{user}}
+    
+    <p>当前用户:{{user}}</p>
+    <p>
+        <li v-for="dbnum in dbNumList">{{dbnum}}</li>
+    </p>
+    
     
     <el-input
     v-model="sqltext"
@@ -12,12 +17,13 @@
 
 <script setup>
 import router from '../router';
-import { ref } from 'vue';
+import { onBeforeMount, reactive, ref, toRefs } from 'vue';
 import {usePost} from '../../js/useaxios.js'
 
     const user=router.currentRoute.value.params.username
     
     const sqltext=ref("")
+    const dbNumList=reactive([])
 
     function execsql(){
         let data={
@@ -40,5 +46,30 @@ import {usePost} from '../../js/useaxios.js'
         })
 
     }
+    //挂载之前获取可用实例列表
+   
+    onBeforeMount(()=>{
+        let data={
+            username:'xiaoshimin',
+        }
+        let api='http://127.0.0.1:8081/api/getdbinstancelist'
+        let headers={
+            'Content-Type': 'multipart/form-data',
+        }
+        
+        usePost(api,headers,data)
+        .then(res=>{
+            console.log(res.data.data.dbNumList)
+            res.data.data.dbNumList.forEach(element => {
+                dbNumList.push(element)
+            });
+        })
+        .catch(err=>{
+            console.log(err)
+        })
+
+        return {dbNumList}
+    })
+    
 
 </script>
