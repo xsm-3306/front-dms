@@ -2,13 +2,23 @@
     
     <p>当前用户:{{user}}</p>
 
-    <el-tree :props="props" :load="loadNode"   lazy show-checkbox />
+    <el-tree 
+        :props="props" 
+        :load="loadNode" 
+        
 
-    <p>
-        <li v-for="dbnum in dbNumList.list">{{dbnum}}</li>
-    </p>
-    
-    
+        ref="treeRef"
+        node-key="id"
+       
+        @check-change="handleCheckChange"
+        
+        lazy
+        check-on-click-node
+        accordion
+        show-checkbox
+        highlight-current  
+        />
+  
     <el-input
     v-model="sqltext"
     :rows="8"
@@ -17,25 +27,20 @@
   />
   <el-button type="success" @click="execsql">确认</el-button>
 
-  
-
 </template>
 
 <script lang="ts" setup>
 import router from '../router';
-import { onBeforeMount, reactive, ref, toRefs } from 'vue';
+import {  ref } from 'vue';
 import {usePost} from '../../js/useaxios.js'
-import type Node from 'element-plus/es/components/tree/src/model/node'
-import { treeEmits } from 'element-plus/es/components/tree-v2/src/virtual-tree';
+import { ElTree } from 'element-plus'
 
-    const user=router.currentRoute.value.params.username
-    
-    const sqltext=ref("")
-    const dbNumList=reactive({
-        list: [] as any[]  //类型断言
-    })
 
-    function execsql(){
+const user=router.currentRoute.value.params.username
+
+const sqltext=ref("")
+
+function execsql(){
         let data={
             sql:sqltext.value,
             username:'admin',
@@ -56,70 +61,96 @@ import { treeEmits } from 'element-plus/es/components/tree-v2/src/virtual-tree';
         })
 
     }
-    //挂载之前获取可用实例列表
-    onBeforeMount(()=>{
+ 
+const props={
+        label: 'name',
+        children: "",
+        isLeaf: 'leaf'
+    }
+
+function handleNodeClick(data){
+        console.log("node",data)
+    }
+
+const loadNode=(node,resolve)=>{
+      // console.log(node, resolve)
+      // 一级节点处理。数据库实例列表
+      if (node.level === 0) {
+        getDbInstanceList(resolve)
+      }
+      // 二级节点处理。数据库列表
+      if (node.level == 1) {
+        // 注意！把resolve传到你自己的异步中去
+        getDbList(resolve,node)
+    }
+      if(node.level>=2){
+        //所有的权限只到库级别的粒度，表级别不展示
+        return resolve([])
+      }
+}
+
+//首次加载所有可用数据库实例，一级节点
+ function getDbInstanceList(resolve){
         let data={
-            username:'admin',
+            username:user,
         }
         let api='http://127.0.0.1:8081/api/getdbinstancelist'
         let headers={
             'Content-Type': 'multipart/form-data',
         }
-        
+
         usePost(api,headers,data)
         .then(res=>{
-            console.log(res.data.data.dbNumList)
-            res.data.data.dbNumList.forEach(element => dbNumList.list.push(element));
+            console.log(res.data.data,res.data.msg)
+            if(res.data.code===200){
+               let dbInstanceList=res.data.data.dbNumList.map((item)=>{
+                    return{
+                        name:item,
+                        leaf:false
+                    }
+                })
+                //let data=res.data.data.dbNumList
+                resolve(dbInstanceList)
+            }
         })
-        .catch(err=>{
-            console.log(err)
-        })
-
-        return {dbNumList}
-    })
-    
-
-    interface Tree {
-    name: string
-    leaf?: boolean
-  }
-  
-  const props = {
-    label: 'name',
-    children: 'zones',
-    isLeaf: 'leaf',
-  }
-  
-  const loadNode = (node: Node, resolve: (data: Tree[]) => void) => {
-    if (node.level === 0) {
-        
-        let showList=reactive({
-        list: [] as any[]  //类型断言
-    })
-        showList.list=dbNumList.list.map(item=>{
-            item.leaf=false
-            return item
-        })
-
-      return resolve(showList.list)
     }
-    if (node.level > 1) return resolve([])
+
+//加载可用数据库列表，叶子节点
+function getDbList(resolve,node){
+    let data={
+            username:user,
+            dbnum:node.data.name
+        }
+        let api='http://127.0.0.1:8081/api/getdblist'
+        let headers={
+            'Content-Type': 'multipart/form-data',
+        }
+
+        usePost(api,headers,data)
+        .then(res=>{
+            console.log(res.data.data,res.data.msg)
+            if(res.data.code===200){
+               let dbList=res.data.data.dbList.map((item)=>{
+                    return{
+                        name:item,
+                        leaf:true
+                    }
+                })
+                //let data=res.data.data.dbNumList
+                resolve(dbList)
+            }
+        })
+}
+
+const treeRef = ref<InstanceType<typeof ElTree>>()
+//check-change事件触发。实现复选框即数据库单选
+function handleCheckChange(data,checked,indeterminate){
+    if(checked){
+     treeRef.value!.setCheckedKeys([data.id],true)
+     }
+    console.log(data,checked,indeterminate)
     
-    setTimeout(() => {
-      const data: Tree[] = [
-        {
-          name: 'dms',
-          leaf: true,
-        },
-        {
-          name: 'zone',
-          leaf: true,
-        },
-      ]
-      
-  
-      resolve(data)
-    }, 500)
-  }
+}
+
 
 </script>

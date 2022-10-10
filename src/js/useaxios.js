@@ -1,5 +1,7 @@
 import axios from "axios";
 
+axios.defaults.timeout=10000
+
 export function usePost(api,headers={},data={}){                     
     return new Promise((resolve, reject) => {
         axios({
