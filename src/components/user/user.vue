@@ -9,16 +9,24 @@
 
         ref="treeRef"
         node-key="id"
-       
+        check-strictly:false
         @check-change="handleCheckChange"
-        
+        show-checkbox
         lazy
         check-on-click-node
         accordion
-        show-checkbox
+        
         highlight-current  
+
         />
-  
+
+        <div class="buttons">
+    <el-button @click="getCheckedNodes">get by node</el-button>
+    <el-button @click="getCheckedKeys">get by key</el-button>
+
+  </div>
+        
+
     <el-input
     v-model="sqltext"
     :rows="8"
@@ -34,6 +42,7 @@ import router from '../router';
 import {  ref } from 'vue';
 import {usePost} from '../../js/useaxios.js'
 import { ElTree } from 'element-plus'
+import Node from 'element-plus/es/components/tree/src/model/node'
 
 
 const user=router.currentRoute.value.params.username
@@ -103,8 +112,9 @@ const loadNode=(node,resolve)=>{
         .then(res=>{
             console.log(res.data.data,res.data.msg)
             if(res.data.code===200){
-               let dbInstanceList=res.data.data.dbNumList.map((item)=>{
+               let dbInstanceList=res.data.data.dbNumList.map((item, index)=>{
                     return{
+                        id: index,
                         name:item,
                         leaf:false
                     }
@@ -117,9 +127,10 @@ const loadNode=(node,resolve)=>{
 
 //加载可用数据库列表，叶子节点
 function getDbList(resolve,node){
+    let dbNum=node.data.name
     let data={
             username:user,
-            dbnum:node.data.name
+            dbnum:dbNum
         }
         let api='http://127.0.0.1:8081/api/getdblist'
         let headers={
@@ -130,8 +141,9 @@ function getDbList(resolve,node){
         .then(res=>{
             console.log(res.data.data,res.data.msg)
             if(res.data.code===200){
-               let dbList=res.data.data.dbList.map((item)=>{
+               let dbList=res.data.data.dbList.map((item, index)=>{
                     return{
+                        id: item+"-"+index,
                         name:item,
                         leaf:true
                     }
@@ -145,12 +157,18 @@ function getDbList(resolve,node){
 const treeRef = ref<InstanceType<typeof ElTree>>()
 //check-change事件触发。实现复选框即数据库单选
 function handleCheckChange(data,checked,indeterminate){
-    if(checked){
-     treeRef.value!.setCheckedKeys([data.id],true)
-     }
-    console.log(data,checked,indeterminate)
-    
+    if(checked){ 
+        treeRef.value!.setCheckedKeys([data.id],true)
+        console.log(data)
+    }
+    //console.log(data)
 }
 
+const getCheckedNodes = () => {
+  console.log(treeRef.value!.getCheckedNodes(false, false))
+}
+const getCheckedKeys = () => {
+  console.log(treeRef.value!.getCheckedKeys(true))
+}
 
 </script>
