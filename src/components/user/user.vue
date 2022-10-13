@@ -1,32 +1,27 @@
 <template>
     
     <p>当前用户:{{user}}</p>
-
-    <el-tree 
+    
+    <p>{{response}}</p>
+ 
+    
+    <div class="dbtree">
+        <el-tree 
         :props="props" 
         :load="loadNode" 
         
-
         ref="treeRef"
         node-key="id"
-        check-strictly:false
+        @node-expand="handleNodeExpand"
         @check-change="handleCheckChange"
-        show-checkbox
         lazy
-        check-on-click-node
+        check-on-click-node	
         accordion
-        
         highlight-current  
-
-        />
-
-        <div class="buttons">
-    <el-button @click="getCheckedNodes">get by node</el-button>
-    <el-button @click="getCheckedKeys">get by key</el-button>
-
-  </div>
-        
-
+        > 
+        </el-tree>
+    </div>
+    
     <el-input
     v-model="sqltext"
     :rows="8"
@@ -39,9 +34,9 @@
 
 <script lang="ts" setup>
 import router from '../router';
-import {  ref } from 'vue';
+import {  reactive, ref } from 'vue';
 import {usePost} from '../../js/useaxios.js'
-import { ElTree } from 'element-plus'
+import { ElMessage, ElMessageBox, ElTree } from 'element-plus'
 import Node from 'element-plus/es/components/tree/src/model/node'
 
 
@@ -52,9 +47,9 @@ const sqltext=ref("")
 function execsql(){
         let data={
             sql:sqltext.value,
-            username:'admin',
-            dbname:'dms',
-            dbnum:'db0'
+            username:user,
+            dbname:localStorage.getItem("dbname"),
+            dbnum:localStorage.getItem("dbnum")
         }
         let api='http://127.0.0.1:8081/api/sqlhandler'
         let headers={
@@ -64,12 +59,14 @@ function execsql(){
         usePost(api,headers,data)
         .then(res=>{
             console.log(res.data.data,res.data.msg)
+            response=res.data
         })
         .catch(err=>{
             console.log(err)
         })
-
+        return response
     }
+    let response=ref("")
  
 const props={
         label: 'name',
@@ -77,9 +74,6 @@ const props={
         isLeaf: 'leaf'
     }
 
-function handleNodeClick(data){
-        console.log("node",data)
-    }
 
 const loadNode=(node,resolve)=>{
       // console.log(node, resolve)
@@ -159,16 +153,36 @@ const treeRef = ref<InstanceType<typeof ElTree>>()
 function handleCheckChange(data,checked,indeterminate){
     if(checked){ 
         treeRef.value!.setCheckedKeys([data.id],true)
+        localStorage.setItem("dbname",data.name)
         console.log(data)
     }
     //console.log(data)
 }
 
-const getCheckedNodes = () => {
-  console.log(treeRef.value!.getCheckedNodes(false, false))
-}
-const getCheckedKeys = () => {
-  console.log(treeRef.value!.getCheckedKeys(true))
+//每次点击展开获取dbnum
+function handleNodeExpand(data,node){
+    if(!data.leaf){
+        localStorage.setItem("dbnum",data.name)
+    }
+    console.log(data)
 }
 
 </script>
+
+
+<style lang="css" scoped>
+.dbtree{
+    flex: 1;
+    max-width:200px;
+    height:auto;
+    background:rgba(245,248,250,1);
+    border-radius:3px;
+    border:1px solid rgba(211,219,222,1);
+    margin-left: 12px;
+    padding: 14px;
+}
+ 
+
+
+
+</style>
