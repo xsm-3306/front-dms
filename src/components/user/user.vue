@@ -1,36 +1,51 @@
-<template>
-    
-    <p>当前用户:{{user}}</p>
-    
-    <p>{{response}}</p>
- 
-    
-    <div class="dbtree">
-        <el-tree 
-        :props="props" 
-        :load="loadNode" 
-        
-        ref="treeRef"
-        node-key="id"
-        @node-expand="handleNodeExpand"
-        @check-change="handleCheckChange"
-        lazy
-        check-on-click-node	
-        accordion
-        highlight-current  
-        > 
-        </el-tree>
-    </div>
-    
-    <el-input
-    v-model="sqltext"
-    :rows="8"
-    type="textarea"
-    placeholder="此处输入 SQL"
-  />
-  <el-button type="success" @click="execsql">确认</el-button>
 
+<template>
+    <div class="common-layout">
+      <el-container>
+        <div class="head-show">
+            <el-header>当前用户:{{user}}</el-header>
+        </div>
+        
+        <el-container>
+          <el-aside width="200px">
+            <div class="dbtree">
+                <el-tree 
+                    :props="props" 
+                    :load="loadNode" 
+                    ref="treeRef"
+                    node-key="id"
+                    @node-expand="handleNodeExpand"
+                    @check-change="handleCheckChange"
+                    lazy
+                    check-on-click-node	
+                    accordion
+                    highlight-current  
+                    > </el-tree>
+            </div>
+          </el-aside>
+
+          <el-main>
+            <div class="sql-input">
+                <el-input
+                v-model="sqltext"
+                :rows="8"
+                type="textarea"
+                 placeholder="此处输入 SQL"
+            />
+            </div>
+            
+            <div class="execsql-button">
+                <el-button type="success" @click="execsql" height="500px">确认</el-button>
+            </div>
+            
+          </el-main>
+
+        </el-container>
+      </el-container>
+    </div>
 </template>
+
+
 
 <script lang="ts" setup>
 import router from '../router';
@@ -171,17 +186,6 @@ function handleNodeExpand(data,node){
 
 
 <style lang="css" scoped>
-.dbtree{
-    flex: 1;
-    max-width:200px;
-    height:auto;
-    background:rgba(245,248,250,1);
-    border-radius:3px;
-    border:1px solid rgba(211,219,222,1);
-    margin-left: 12px;
-    padding: 14px;
-}
- 
 
 
 
