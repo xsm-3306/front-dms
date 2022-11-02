@@ -62,13 +62,13 @@ const sqltext=ref("")
 function execsql(){
         let data={
             sql:sqltext.value,
-            username:user,
             dbname:localStorage.getItem("dbname"),
             dbnum:localStorage.getItem("dbnum")
         }
-        let api='http://127.0.0.1:8081/api/sqlhandler'
+        let api='http://192.168.37.149:8081/api/sqlhandler'
         let headers={
             'Content-Type': 'multipart/form-data',
+            'Authorization':'Bearer '+localStorage.getItem('token')
         }
 
         usePost(api,headers,data)
@@ -110,11 +110,11 @@ const loadNode=(node,resolve)=>{
 //首次加载所有可用数据库实例，一级节点
  function getDbInstanceList(resolve){
         let data={
-            username:user,
         }
-        let api='http://127.0.0.1:8081/api/getdbinstancelist'
+        let api='http://192.168.37.149:8081/api/getdbinstancelist'
         let headers={
             'Content-Type': 'multipart/form-data',
+            'Authorization':'Bearer '+localStorage.getItem('token')
         }
 
         usePost(api,headers,data)
@@ -130,6 +130,8 @@ const loadNode=(node,resolve)=>{
                 })
                 //let data=res.data.data.dbNumList
                 resolve(dbInstanceList)
+            }else {
+                router.push('/login')
             }
         })
     }
@@ -138,12 +140,12 @@ const loadNode=(node,resolve)=>{
 function getDbList(resolve,node){
     let dbNum=node.data.name
     let data={
-            username:user,
             dbnum:dbNum
         }
-        let api='http://127.0.0.1:8081/api/getdblist'
+        let api='http://192.168.37.149:8081/api/getdblist'
         let headers={
             'Content-Type': 'multipart/form-data',
+            'Authorization':'Bearer '+localStorage.getItem('token')
         }
 
         usePost(api,headers,data)
@@ -159,6 +161,8 @@ function getDbList(resolve,node){
                 })
                 //let data=res.data.data.dbNumList
                 resolve(dbList)
+            }else {
+                router.push('/login')
             }
         })
 }
