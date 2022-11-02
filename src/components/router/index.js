@@ -13,6 +13,25 @@ const router=createRouter({
 })
 
 
+router.beforeEach(async(to,from)=>{
+    let data={
+    }
+    let api='http://192.168.37.149:8081/api/getdbinstancelist'
+    let headers={
+        'Content-Type': 'multipart/form-data',
+        'Authorization':'Bearer '+localStorage.getItem('token')
+    } 
+    if(from!=='login'){
+        usePost(api,headers,data)
+        .then(res=>{
+            if (res.data.data.code!==200){
+                return{name:'login'}
+            }
+        })
+    }
+
+
+})
 
 
 export default router
