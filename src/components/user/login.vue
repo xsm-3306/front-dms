@@ -20,7 +20,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
     }
     function login(){
         let data=loginInfo.value
-        let api='http://192.168.37.149:8081/api/user/login'
+        let api='/api/user/login'
         let headers={
             'Content-Type': 'multipart/form-data',
         }
@@ -112,7 +112,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
   }
   .head .title {
     font-size: 28px;
-    color: #1BAEAE;
+    color:#4aaee8;
     font-weight: bold;
   }
   .head .tips {

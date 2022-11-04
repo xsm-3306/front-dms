@@ -65,7 +65,7 @@ function execsql(){
             dbname:localStorage.getItem("dbname"),
             dbnum:localStorage.getItem("dbnum")
         }
-        let api='http://192.168.37.149:8081/api/sqlhandler'
+        let api='/api/sqlhandler'
         let headers={
             'Content-Type': 'multipart/form-data',
             'Authorization':'Bearer '+localStorage.getItem('token')
@@ -111,7 +111,7 @@ const loadNode=(node,resolve)=>{
  function getDbInstanceList(resolve){
         let data={
         }
-        let api='http://192.168.37.149:8081/api/getdbinstancelist'
+        let api='/api/getdbinstancelist'
         let headers={
             'Content-Type': 'multipart/form-data',
             'Authorization':'Bearer '+localStorage.getItem('token')
@@ -142,7 +142,7 @@ function getDbList(resolve,node){
     let data={
             dbnum:dbNum
         }
-        let api='http://192.168.37.149:8081/api/getdblist'
+        let api='/api/getdblist'
         let headers={
             'Content-Type': 'multipart/form-data',
             'Authorization':'Bearer '+localStorage.getItem('token')
