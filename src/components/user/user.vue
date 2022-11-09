@@ -1,13 +1,11 @@
+<template >
 
-<template>
     <div class="common-layout">
       <el-container>
-        <div class="head-show">
-            <el-header>当前用户:{{user}}</el-header>
-        </div>
+        <el-header class="header">当前用户:{{user}}</el-header>
         
         <el-container>
-          <el-aside width="200px">
+          <el-aside width="200px" class="side">
             <div class="dbtree">
                 <el-tree 
                     :props="props" 
@@ -24,11 +22,11 @@
             </div>
           </el-aside>
 
-          <el-main>
+          <el-main class="main">
             <div class="sql-input">
                 <el-input
                 v-model="sqltext"
-                :rows="8"
+                :rows="16"
                 type="textarea"
                  placeholder="此处输入 SQL"
             />
@@ -45,6 +43,29 @@
     </div>
 </template>
 
+
+<style lang="css" scoped>
+
+.header{
+   color: black;
+
+}
+.execsql-button{
+    background-color: bisque;
+    position: absolute;
+    right: 0
+    }
+ .side{
+    background-color:whitesmoke;
+    border-radius: 4px;
+    box-shadow: 0px 21px 41px 0px rgba(0, 0, 0, 0.2);
+}
+.main{
+    background-color:grey;
+    border-radius: 4px;
+    box-shadow: 0px 21px 41px 0px rgba(0, 0, 0, 0.2);
+}
+</style>
 
 
 <script lang="ts" setup>
@@ -81,6 +102,7 @@ function execsql(){
         })
         return response
     }
+    
     let response=ref("")
  
 const props={
@@ -133,6 +155,10 @@ const loadNode=(node,resolve)=>{
             }else {
                 router.push('/login')
             }
+        }).catch(err=>{
+            if(err){
+                router.push({name:'login'})
+            }
         })
     }
 
@@ -150,7 +176,7 @@ function getDbList(resolve,node){
 
         usePost(api,headers,data)
         .then(res=>{
-            console.log(res.data.data,res.data.msg)
+            console.log('asdasd',res.data.data,res.data.msg)
             if(res.data.code===200){
                let dbList=res.data.data.dbList.map((item, index)=>{
                     return{
@@ -162,9 +188,14 @@ function getDbList(resolve,node){
                 //let data=res.data.data.dbNumList
                 resolve(dbList)
             }else {
-                router.push('/login')
+                router.push({name:'login'})
+            }
+        }).catch(err=>{
+            if(err){
+                router.push({name:'login'})
             }
         })
+
 }
 
 const treeRef = ref<InstanceType<typeof ElTree>>()
@@ -189,8 +220,3 @@ function handleNodeExpand(data,node){
 </script>
 
 
-<style lang="css" scoped>
-
-
-
-</style>
