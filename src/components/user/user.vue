@@ -2,10 +2,7 @@
 
     <div class="common-layout">
       <el-container>
-        <el-header class="header">当前用户:{{user}}</el-header>
-        
-        <el-container>
-          <el-aside width="200px" class="side">
+        <el-aside width="250px" class="side">
             <div class="dbtree">
                 <el-tree 
                     :props="props" 
@@ -22,6 +19,9 @@
             </div>
           </el-aside>
 
+        <el-container>
+          
+            <el-header class="header">当前用户:{{user}}</el-header>
           <el-main class="main">
             <div class="sql-input">
                 <el-input
@@ -38,47 +38,44 @@
             
           </el-main>
 
+          <el-footer class="resultLog">
+                <div id="overflow">
+                    <p v-for="(activity, index) in resultLog"
+                        :key="index">
+                        {{activity.msg}}:{{ activity.data }}
+                    </p>
+                </div>
+                
+
+          </el-footer>
+
         </el-container>
       </el-container>
     </div>
 </template>
 
 
-<style lang="css" scoped>
-
-.header{
-   color: black;
-
-}
-.execsql-button{
-    background-color: bisque;
-    position: absolute;
-    right: 0
-    }
- .side{
-    background-color:whitesmoke;
-    border-radius: 4px;
-    box-shadow: 0px 21px 41px 0px rgba(0, 0, 0, 0.2);
-}
-.main{
-    background-color:grey;
-    border-radius: 4px;
-    box-shadow: 0px 21px 41px 0px rgba(0, 0, 0, 0.2);
-}
-</style>
-
-
 <script lang="ts" setup>
 import router from '../router';
-import {  reactive, ref } from 'vue';
+import {  reactive, ref, toRefs, watch } from 'vue';
 import {usePost} from '../../js/useaxios.js'
-import { ElMessage, ElMessageBox, ElTree } from 'element-plus'
+import { ElMessage, ElMessageBox, ElTree, inputEmits } from 'element-plus'
 import Node from 'element-plus/es/components/tree/src/model/node'
 
 
 const user=router.currentRoute.value.params.username
 
 const sqltext=ref("")
+
+const resultLog =reactive([
+    {msg:"",data:""},
+]) 
+
+var divoverow=document.getElementById('overflow')?.scrollIntoView()
+/*
+https://segmentfault.com/q/1010000007028422
+*/
+
 
 function execsql(){
         let data={
@@ -96,11 +93,21 @@ function execsql(){
         .then(res=>{
             console.log(res.data.data,res.data.msg)
             response=res.data
+
+            resultLog.push({
+                msg:res.data.msg,
+                data:res.data.data
+            })
+            
         })
         .catch(err=>{
             console.log(err)
+            router.push({name:'login'})
         })
-        return response
+       /* return response*/
+        return {
+            ...toRefs(resultLog),response
+        }
     }
     
     let response=ref("")
@@ -217,6 +224,46 @@ function handleNodeExpand(data,node){
     console.log(data)
 }
 
+
+
+
+
 </script>
 
 
+
+
+
+<style lang="css" scoped>
+
+.header{
+    color: black;
+}
+.execsql-button{
+    background-color: bisque;
+    position: absolute;
+    right: 0
+    }
+ .side{
+    background-color:whitesmoke;
+    border-radius: 4px;
+    box-shadow: 0px 21px 41px 0px rgba(0, 0, 0, 0.2);
+    height: 620px;
+    overflow-y:scroll;
+    scroll-behavior:smooth;
+}
+.dbtree{
+    margin-top: 30px;
+}
+.main{
+    background-color:grey;
+    border-radius: 4px;
+    box-shadow: 0px 21px 41px 0px rgba(0, 0, 0, 0.2);
+}
+.resultLog{
+    background-color:whitesmoke;
+    height: 180px;
+    overflow:auto;
+    
+}
+</style>
