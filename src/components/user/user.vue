@@ -39,11 +39,10 @@
           </el-main>
 
           <el-footer class="resultLog">
-                <div id="overflow">
-                    <p v-for="(activity, index) in resultLog"
+                <el-scroll></el-scroll>
+                <div  id="myflow" v-for="(activity, index) in resultLog"
                         :key="index">
-                        {{activity.msg}}:{{ activity.data }}
-                    </p>
+                        {{activity.msg}}:{{ activity.data }}:{{index}}
                 </div>
                 
 
@@ -59,9 +58,7 @@
 import router from '../router';
 import {  reactive, ref, toRefs, watch } from 'vue';
 import {usePost} from '../../js/useaxios.js'
-import { ElMessage, ElMessageBox, ElTree, inputEmits } from 'element-plus'
-import Node from 'element-plus/es/components/tree/src/model/node'
-
+import {  ElTree } from 'element-plus'
 
 const user=router.currentRoute.value.params.username
 
@@ -71,11 +68,16 @@ const resultLog =reactive([
     {msg:"",data:""},
 ]) 
 
-var divoverow=document.getElementById('overflow')?.scrollIntoView()
+watch(
+    ()=>resultLog.length,
+    (length)=>{
+        console.log("长度：",length)
+        document.getElementById('myflow').scrollTop = document.getElementById('myflow').scrollHeight;
+    }
+)
 /*
 https://segmentfault.com/q/1010000007028422
 */
-
 
 function execsql(){
         let data={
@@ -89,6 +91,7 @@ function execsql(){
             'Authorization':'Bearer '+localStorage.getItem('token')
         }
 
+
         usePost(api,headers,data)
         .then(res=>{
             console.log(res.data.data,res.data.msg)
@@ -98,6 +101,7 @@ function execsql(){
                 msg:res.data.msg,
                 data:res.data.data
             })
+            document.getElementById('myflow').scrollTop = document.getElementById('myflow').scrollHeight;
             
         })
         .catch(err=>{
@@ -110,7 +114,7 @@ function execsql(){
         }
     }
     
-    let response=ref("")
+let response=ref("")
  
 const props={
         label: 'name',
